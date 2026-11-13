@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title">
+  <title id="title">Hốc đọc riêng với quyển sách đang mở</title>
+  <rect width="48" height="48" rx="14" fill="#1c4d43"/>
+  <path d="M10 24V19.5C10 11.5 16.2 7 24 7s14 4.5 14 12.5V24" fill="none" stroke="#b9d5c5" stroke-linecap="round" stroke-width="2.6"/>
+  <path d="M11 24.5c4.7-1.2 9.2-.3 13 2.5 3.8-2.8 8.3-3.7 13-2.5v12c-4.8-1.1-9.2-.2-13 2.5-3.8-2.7-8.2-3.6-13-2.5z" fill="#f6f3e9"/>
+  <path d="M24 27v12" fill="none" stroke="#1c4d43" stroke-linecap="round" stroke-width="1.8"/>
+  <path d="M15 29.5c2.4-.3 4.4.1 6.3 1.1M33 29.5c-2.4-.3-4.4.1-6.3 1.1" fill="none" stroke="#8da999" stroke-linecap="round" stroke-width="1.5"/>
+  <circle cx="24" cy="14.5" r="2.1" fill="#d99a61"/>
+</svg>

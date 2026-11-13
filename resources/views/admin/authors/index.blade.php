@@ -1,0 +1,44 @@
+@extends('layouts.admin')
+@section('title', 'Quản lý tác giả')
+@section('content')
+<h1 class="h3 mb-3">Quản lý tác giả</h1>
+@if (session('status'))<div class="alert alert-success">{{ session('status') }}</div>@endif
+@if ($errors->any())<div class="alert alert-danger"><ul class="mb-0">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="h6">Thêm tác giả</h2>
+        <form method="POST" action="{{ route('admin.authors.store') }}" class="row g-2">
+            @csrf
+            <div class="col-md-4"><label for="author-name" class="visually-hidden">Tên tác giả</label><input id="author-name" name="name" class="form-control" maxlength="100" value="{{ old('name') }}" placeholder="Tên tác giả" required></div>
+            <div class="col-md-6"><label for="author-bio" class="visually-hidden">Giới thiệu</label><input id="author-bio" name="bio" class="form-control" maxlength="12000" value="{{ old('bio') }}" placeholder="Giới thiệu (không bắt buộc)"></div>
+            <div class="col-md-2 d-grid"><button class="btn btn-dark">Thêm</button></div>
+        </form>
+    </div>
+</div>
+
+@forelse ($authors as $author)
+    <div class="card border-0 shadow-sm mb-2">
+        <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+                <strong>{{ $author->name }}</strong>
+                <span class="badge bg-light text-dark border">{{ $author->book_count }} sách</span>
+            </div>
+            <form method="POST" action="{{ route('admin.authors.update', $author->id) }}" class="row g-2">
+                @csrf
+                @method('PUT')
+                <div class="col-md-4"><label for="author-name-{{ $author->id }}" class="visually-hidden">Tên tác giả</label><input id="author-name-{{ $author->id }}" name="name" class="form-control form-control-sm" maxlength="100" value="{{ $author->name }}" required></div>
+                <div class="col-md-6"><label for="author-bio-{{ $author->id }}" class="visually-hidden">Giới thiệu</label><input id="author-bio-{{ $author->id }}" name="bio" class="form-control form-control-sm" maxlength="12000" value="{{ $author->bio }}" placeholder="Giới thiệu"></div>
+                <div class="col-auto"><button class="btn btn-outline-primary btn-sm">Lưu</button></div>
+            </form>
+            <form method="POST" action="{{ route('admin.authors.destroy', $author->id) }}" data-confirm-message="Xóa tác giả này? Sách đang sử dụng tác giả sẽ được giữ nguyên và cần đổi tác giả trước." data-confirm-title="Xóa tác giả?" data-confirm-accept="Xóa tác giả" data-confirm-variant="danger">
+                @csrf
+                @method('DELETE')
+                <button class="btn btn-outline-danger btn-sm">Xóa</button>
+            </form>
+        </div>
+    </div>
+@empty
+    <div class="alert alert-secondary">Chưa có tác giả nào.</div>
+@endforelse
+@endsection
