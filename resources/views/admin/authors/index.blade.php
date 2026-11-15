@@ -31,7 +31,7 @@
                 <div class="col-md-6"><label for="author-bio-{{ $author->id }}" class="visually-hidden">Giới thiệu</label><input id="author-bio-{{ $author->id }}" name="bio" class="form-control form-control-sm" maxlength="12000" value="{{ $author->bio }}" placeholder="Giới thiệu"></div>
                 <div class="col-auto"><button class="btn btn-outline-primary btn-sm">Lưu</button></div>
             </form>
-            <form method="POST" action="{{ route('admin.authors.destroy', $author->id) }}" data-confirm-message="Xóa tác giả này? Sách liên quan vẫn được giữ trong thư viện nhưng sẽ không còn thông tin tác giả." data-confirm-title="Xóa tác giả?" data-confirm-accept="Xóa tác giả" data-confirm-variant="danger">
+            <form method="POST" action="{{ route('admin.authors.destroy', $author->id) }}" class="mt-3 pt-2 border-top d-flex justify-content-end" data-confirm-message="Xóa tác giả này? Sách liên quan vẫn được giữ trong thư viện nhưng sẽ không còn thông tin tác giả." data-confirm-title="Xóa tác giả?" data-confirm-accept="Xóa tác giả" data-confirm-variant="danger">
                 @csrf
                 @method('DELETE')
                 <button class="btn btn-outline-danger btn-sm">Xóa</button>
