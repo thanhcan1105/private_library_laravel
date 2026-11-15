@@ -24,18 +24,20 @@
                 <strong>{{ $author->name }}</strong>
                 <span class="badge bg-light text-dark border">{{ $author->book_count }} sách</span>
             </div>
-            <form method="POST" action="{{ route('admin.authors.update', $author->id) }}" class="row g-2">
+            <form id="author-update-{{ $author->id }}" method="POST" action="{{ route('admin.authors.update', $author->id) }}" class="row g-2">
                 @csrf
                 @method('PUT')
                 <div class="col-md-4"><label for="author-name-{{ $author->id }}" class="visually-hidden">Tên tác giả</label><input id="author-name-{{ $author->id }}" name="name" class="form-control form-control-sm" maxlength="100" value="{{ $author->name }}" required></div>
                 <div class="col-md-6"><label for="author-bio-{{ $author->id }}" class="visually-hidden">Giới thiệu</label><input id="author-bio-{{ $author->id }}" name="bio" class="form-control form-control-sm" maxlength="12000" value="{{ $author->bio }}" placeholder="Giới thiệu"></div>
-                <div class="col-auto"><button class="btn btn-outline-primary btn-sm">Lưu</button></div>
             </form>
-            <form method="POST" action="{{ route('admin.authors.destroy', $author->id) }}" class="mt-3 pt-2 border-top d-flex justify-content-end" data-confirm-message="Xóa tác giả này? Sách liên quan vẫn được giữ trong thư viện nhưng sẽ không còn thông tin tác giả." data-confirm-title="Xóa tác giả?" data-confirm-accept="Xóa tác giả" data-confirm-variant="danger">
-                @csrf
-                @method('DELETE')
-                <button class="btn btn-outline-danger btn-sm">Xóa</button>
-            </form>
+            <div class="d-flex justify-content-end align-items-center gap-2 mt-2">
+                <button type="submit" form="author-update-{{ $author->id }}" class="btn btn-outline-primary btn-sm">Lưu</button>
+                <form method="POST" action="{{ route('admin.authors.destroy', $author->id) }}" class="m-0" data-confirm-message="Xóa tác giả này? Sách liên quan vẫn được giữ trong thư viện nhưng sẽ không còn thông tin tác giả." data-confirm-title="Xóa tác giả?" data-confirm-accept="Xóa tác giả" data-confirm-variant="danger">
+                    @csrf
+                    @method('DELETE')
+                    <button class="btn btn-outline-danger btn-sm">Xóa</button>
+                </form>
+            </div>
         </div>
     </div>
 @empty
