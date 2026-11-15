@@ -46,22 +46,7 @@
             </form>
         </div>
     </aside>
-    <main class="app-main admin-main">
-        <div class="admin-main-content">@yield('content')</div>
-        <footer class="app-footer admin-footer">
-            <div class="app-footer-inner">
-                <a class="app-footer-brand" href="{{ route('admin.dashboard') }}">
-                    <img src="{{ asset('images/brand-mark.svg') }}" alt="" aria-hidden="true">
-                    <span><strong>Thư viện riêng</strong><small>Khu vực quản trị</small></span>
-                </a>
-                <nav class="app-footer-links" aria-label="Liên kết cuối trang">
-                    <a href="{{ route('admin.dashboard') }}">Tổng quan</a>
-                    <a href="{{ route('library') }}">Khu người dùng</a>
-                </nav>
-                <small class="app-footer-copyright">© {{ now()->year }} Thư viện riêng</small>
-            </div>
-        </footer>
-    </main>
+    <main class="app-main admin-main">@yield('content')</main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('js/genre-dropdown.js') }}" defer></script>

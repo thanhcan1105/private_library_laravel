@@ -85,24 +85,6 @@
 <main class="container-xl app-main @if (request()->routeIs('books.show')) app-main-reader @endif">
     @yield('content')
 </main>
-<footer class="app-footer">
-    <div class="container-xl app-footer-inner">
-        <a class="app-footer-brand" href="{{ Auth::check() ? route('library') : route('login') }}">
-            <img src="{{ asset('images/brand-mark.svg') }}" alt="" aria-hidden="true">
-            <span><strong>Thư viện riêng</strong><small>Đọc chậm, lưu lại điều đáng nhớ.</small></span>
-        </a>
-        <nav class="app-footer-links" aria-label="Liên kết cuối trang">
-            @auth
-                <a href="{{ route('library') }}">Thư viện</a>
-                <a href="{{ route('catalog.index') }}">Kho sách</a>
-            @else
-                <a href="{{ route('login') }}">Đăng nhập</a>
-                <a href="{{ route('register') }}">Đăng ký</a>
-            @endauth
-        </nav>
-        <small class="app-footer-copyright">© {{ now()->year }} Thư viện riêng</small>
-    </div>
-</footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('js/genre-dropdown.js') }}" defer></script>
 <script src="{{ asset('js/file-upload-size.js') }}" defer></script>

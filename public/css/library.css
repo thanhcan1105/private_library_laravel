@@ -2300,32 +2300,4 @@ html[data-theme="dark"] body:is(.user-body, .admin-body) .theme-toggle-icon { co
 .app-navbar .theme-toggle-btn { width: 190px; justify-content: space-between; padding-inline: .65rem; }
 .admin-side-link.theme-toggle-btn { justify-content: space-between; }
 
-.user-body { display: flex; min-height: 100vh; flex-direction: column; }
-.user-body > .app-main { flex: 1 0 auto; min-height: calc(100vh - 154px); }
-.app-footer { border-top: 1px solid #e1e7e4; background: #fff; }
-.app-footer-inner { display: flex; min-height: 88px; align-items: center; justify-content: space-between; gap: 1.5rem; padding-block: 1rem; }
-.app-footer-brand { display: inline-flex; align-items: center; gap: .7rem; color: #334a42; text-decoration: none; }
-.app-footer-brand img { width: 34px; height: 34px; border-radius: 10px; }
-.app-footer-brand > span { display: flex; flex-direction: column; }
-.app-footer-brand strong { font-size: .83rem; font-weight: 700; }
-.app-footer-brand small, .app-footer-copyright { color: #82918a; font-size: .7rem; }
-.app-footer-links { display: flex; align-items: center; gap: 1.2rem; }
-.app-footer-links a { color: #63776d; font-size: .75rem; text-decoration: none; }
-.app-footer-links a:hover { color: #176a65; }
-.admin-main { display: flex; min-height: 100vh; flex-direction: column; }
-.admin-main-content { flex: 1 0 auto; }
-.admin-footer { margin-top: 2rem; border-top-color: #e1e7e4; background: transparent; }
-.admin-footer .app-footer-inner { width: 100%; min-height: 72px; padding-inline: 0; }
-html[data-theme="dark"] body:is(.user-body, .admin-body) .app-footer { border-color: #354540; background: #17211f; }
-html[data-theme="dark"] body:is(.user-body, .admin-body) .app-footer-brand { color: #dce8e1; }
-html[data-theme="dark"] body:is(.user-body, .admin-body) .app-footer-brand small,
-html[data-theme="dark"] body:is(.user-body, .admin-body) .app-footer-copyright,
-html[data-theme="dark"] body:is(.user-body, .admin-body) .app-footer-links a { color: #a3b2ac; }
-html[data-theme="dark"] body:is(.user-body, .admin-body) .app-footer-links a:hover { color: #9bd2bf; }
 html[data-theme="dark"] body.user-body .library-empty { border-color: #354540; background: #1b2724; }
-@media (max-width: 650px) {
-    .app-footer-inner { flex-wrap: wrap; gap: .8rem 1rem; }
-    .app-footer-links { gap: .8rem; }
-    .app-footer-copyright { width: 100%; }
-    .admin-footer .app-footer-inner { padding-inline: 0; }
-}
