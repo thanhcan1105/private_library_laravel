@@ -2280,15 +2280,8 @@ html[data-theme="dark"] body:is(.user-body, .admin-body) :is(.border, .border-to
 html[data-theme="dark"] body:is(.user-body, .admin-body) .app-confirm-modal .modal-content { border-color: #354540; }
 html[data-theme="dark"] body:is(.user-body, .admin-body) .theme-toggle-btn { border-color: #52645b; color: #d8e5de; }
 html[data-theme="dark"] body.user-body .theme-toggle-btn:hover { background: #263d37; color: #fff; }
-.theme-toggle-btn { display: inline-flex; align-items: center; gap: .5rem; white-space: nowrap; }
-.theme-toggle-track { position: relative; display: inline-flex; width: 2.15rem; height: 1.2rem; flex: 0 0 auto; align-items: center; padding: .13rem; border: 1px solid #c3cec8; border-radius: 999px; background: #e8eeea; transition: background-color .18s ease, border-color .18s ease; }
-.theme-toggle-thumb { width: .82rem; height: .82rem; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .18s ease; }
-.theme-toggle-btn[aria-checked="true"] .theme-toggle-track { border-color: #39836f; background: #39836f; }
-.theme-toggle-btn[aria-checked="true"] .theme-toggle-thumb { transform: translateX(.91rem); }
-.admin-side-link.theme-toggle-btn { min-height: 42px; }
-.admin-side-link > .theme-toggle-track { display: inline-flex; width: 2.15rem; place-items: initial; }
-.admin-side-link > .theme-toggle-label { display: block; width: auto; place-items: initial; }
-.admin-side-link .theme-toggle-track { border-color: #62776d; background: #354941; }
-.admin-side-link[aria-checked="true"] .theme-toggle-track { border-color: #76b99d; background: #39836f; }
-.admin-side-link .theme-toggle-thumb { background: #eaf4ee; }
-html[data-theme="dark"] body.user-body .theme-toggle-btn { background: #24332f; }
+.theme-toggle-icon { display: inline-grid; width: 2.45rem; height: 2.45rem; place-items: center; padding: 0; border-radius: 50%; font-size: 1.15rem; line-height: 1; }
+.theme-toggle-icon > span { display: block; width: auto; color: inherit; font-size: inherit; }
+.theme-toggle-icon:hover { transform: translateY(-1px); }
+.admin-theme-toggle { position: fixed; z-index: 1030; top: 1rem; right: 1.25rem; border-color: #d8e2dc; background: #fff; color: #31584b; box-shadow: 0 4px 16px rgba(25, 43, 38, .12); }
+html[data-theme="dark"] body:is(.user-body, .admin-body) .theme-toggle-icon { border-color: #52645b; background: #24332f; color: #f4d58b; }

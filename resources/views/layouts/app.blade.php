@@ -79,7 +79,7 @@
                 </div>
             </div>
         @endauth
-        <button type="button" class="btn btn-sm btn-outline-secondary theme-toggle-btn" data-theme-toggle role="switch" aria-label="Chế độ tối" aria-checked="{{ $appTheme === 'dark' ? 'true' : 'false' }}"><span class="theme-toggle-track" aria-hidden="true"><span class="theme-toggle-thumb"></span></span><span class="theme-toggle-label">Chế độ tối</span></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary theme-toggle-btn theme-toggle-icon ms-auto" data-theme-toggle role="switch" aria-label="Chuyển sang giao diện tối" title="Chuyển sang giao diện tối" aria-checked="{{ $appTheme === 'dark' ? 'true' : 'false' }}"><span data-theme-icon aria-hidden="true">{{ $appTheme === 'dark' ? '☀' : '☾' }}</span></button>
     </div>
 </nav>
 <main class="container-xl app-main @if (request()->routeIs('books.show')) app-main-reader @endif">
