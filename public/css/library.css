@@ -1035,7 +1035,8 @@ body.user-body .library-upload-cta { padding: .64rem 1rem; border-radius: 9px; b
 .catalog-shortcut-link:hover { background: #f4f7f7; color: #176a65; }
 .catalog-category-link.active { background: #e9f2f1; color: #155e59; font-weight: 700; }
 .catalog-category-link.active > span { color: #20746d; }
-.catalog-category-count { margin-left: auto; padding: .12rem .4rem; border-radius: 999px; background: #f0f3f4; color: #87949b; font-size: .65rem; }
+.catalog-category-count { display: inline-flex; min-width: 1.3rem; height: 1.3rem; align-items: center; justify-content: center; margin-left: auto; padding: 0 .28rem; border: 1px solid #dfe7e7; border-radius: 999px; background: #f0f4f3; color: #697d79; font-size: .66rem; font-weight: 700; line-height: 1; }
+.catalog-category-link.active .catalog-category-count { border-color: #cce2db; background: #dcece7; color: #176a65; }
 .catalog-shortcuts { padding-bottom: .75rem; }
 .catalog-sidebar-note { display: flex; gap: .55rem; padding: .75rem .7rem; border: 1px solid #e7e5db; border-radius: 10px; background: #f7f6ef; color: #828778; }
 .catalog-sidebar-note > span { color: #b58951; }
@@ -2245,6 +2246,8 @@ html[data-theme="dark"] body.user-body :is(.book-card-title a, .shared-book-copy
 html[data-theme="dark"] body.user-body :is(.catalog-category-link, .catalog-shortcut-link) { color: #b8c9c2; }
 html[data-theme="dark"] body.user-body :is(.catalog-sidebar-panel h2, .catalog-category-link.active) { color: #d9e8e1; }
 html[data-theme="dark"] body.user-body :is(.catalog-category-link:hover, .catalog-shortcut-link:hover, .catalog-category-link.active) { background: #263d37; }
+html[data-theme="dark"] body.user-body .catalog-category-count { border-color: #38554a; background: #213a32; color: #afcfc1; }
+html[data-theme="dark"] body.user-body .catalog-category-link.active .catalog-category-count { border-color: #477363; background: #34594b; color: #e1f2e8; }
 html[data-theme="dark"] body.user-body .catalog-sidebar-note { border-color: #51483a; background: #302a21; color: #d0c1a7; }
 html[data-theme="dark"] body.user-body .continue-reading-card,
 html[data-theme="dark"] body.user-body .reading-welcome-card { border-color: #354b43; background: linear-gradient(110deg, #1e3430, #202b27 70%, #302d24) !important; }
