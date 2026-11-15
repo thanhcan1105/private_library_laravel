@@ -297,7 +297,6 @@ if (notificationConfig) {
         }
 
         card.dataset.markingRead = 'true';
-        const previousUnreadCount = unreadCount;
         const readLabel = document.createElement('span');
         readLabel.className = 'notification-read-label';
         readLabel.textContent = 'Đã đọc';
@@ -328,11 +327,16 @@ if (notificationConfig) {
                 updateCounters();
             }
         } catch {
+            // A delete or navigation may have removed this card while the request was in flight.
+            if (!card.isConnected) {
+                return;
+            }
+
             card.classList.add('is-unread');
             card.tabIndex = 0;
             readLabel.remove();
             actions.prepend(readForm);
-            unreadCount = previousUnreadCount;
+            unreadCount += 1;
             updateCounters();
         } finally {
             delete card.dataset.markingRead;
@@ -341,12 +345,27 @@ if (notificationConfig) {
 
     document.addEventListener('click', (event) => {
         const card = event.target.closest('[data-notification-id].notification-card');
-        if (!card || event.target.closest('a, button, form, input, select, textarea')) {
+        if (!card) {
             return;
         }
 
+        // The explicit read action stays on the same page and uses the same background request.
+        if (event.target.closest('[data-notification-read-form]')) {
+            event.preventDefault();
+        }
+
         markNotificationCardRead(card);
-    });
+    }, true);
+
+    document.addEventListener('submit', (event) => {
+        const readForm = event.target.closest('form[data-notification-read-form]');
+        if (!readForm) {
+            return;
+        }
+
+        event.preventDefault();
+        markNotificationCardRead(readForm.closest('[data-notification-id].notification-card'));
+    }, true);
 
     document.addEventListener('keydown', (event) => {
         if (event.key !== 'Enter' && event.key !== ' ') {
@@ -354,7 +373,7 @@ if (notificationConfig) {
         }
 
         const card = event.target.closest('[data-notification-id].notification-card[tabindex="0"]');
-        if (card && !event.target.closest('a, button, form, input, select, textarea')) {
+        if (card && event.target === card) {
             event.preventDefault();
             markNotificationCardRead(card);
         }

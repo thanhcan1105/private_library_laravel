@@ -68,20 +68,29 @@ class AuthorController extends Controller
 
     public function destroy(int $id): RedirectResponse
     {
-        $author = DB::table('authors')->where('id', $id)->first(['id']);
-        abort_if(! $author, 404, 'Không tìm thấy tác giả.');
-
         try {
-            DB::table('authors')->where('id', $id)->delete();
+            $detachedBooks = DB::transaction(function () use ($id): int {
+                $author = DB::table('authors')->where('id', $id)->lockForUpdate()->first(['id']);
+                abort_if(! $author, 404, 'Không tìm thấy tác giả.');
+
+                $detachedBooks = DB::table('books')->where('author_id', $id)->update(['author_id' => null]);
+                DB::table('authors')->where('id', $id)->delete();
+
+                return $detachedBooks;
+            });
         } catch (QueryException $exception) {
             if ((int) ($exception->errorInfo[1] ?? 0) === 1451) {
-                return back()->withErrors(['author' => 'Không thể xóa tác giả đang được sách sử dụng.']);
+                return back()->withErrors(['author' => 'Không thể xóa tác giả lúc này. Hãy tải lại trang rồi thử lại.']);
             }
 
             throw $exception;
         }
 
-        return redirect()->route('admin.authors.index')->with('status', 'Đã xóa tác giả.');
+        $status = $detachedBooks > 0
+            ? "Đã xóa tác giả. {$detachedBooks} sách được giữ lại và bỏ liên kết tác giả."
+            : 'Đã xóa tác giả.';
+
+        return redirect()->route('admin.authors.index')->with('status', $status);
     }
 
     private function messages(): array

@@ -168,10 +168,11 @@ class NotificationController extends Controller
     private function markFeedNotificationAsRead(string $id, string $audience, NotificationFeedService $notificationFeed): void
     {
         $user = Auth::user();
-        $notification = $notificationFeed->query($user, $audience)->where('id', $id)->firstOrFail();
+        $query = $notificationFeed->query($user, $audience)->where('id', $id);
+        abort_unless((clone $query)->exists(), 404);
 
-        if ($notification->read_at === null) {
-            $notification->markAsRead();
+        $updated = $query->whereNull('read_at')->update(['read_at' => now()]);
+        if ($updated > 0) {
             $this->broadcastUnreadCount($user, $audience, $notificationFeed->unreadCount($user, $audience));
         }
     }
@@ -191,8 +192,10 @@ class NotificationController extends Controller
     private function markFeedAsRead(string $audience, NotificationFeedService $notificationFeed): void
     {
         $user = Auth::user();
-        $notificationFeed->query($user, $audience)->whereNull('read_at')->update(['read_at' => now()]);
-        $this->broadcastUnreadCount($user, $audience, $notificationFeed->unreadCount($user, $audience));
+        $updated = $notificationFeed->query($user, $audience)->whereNull('read_at')->update(['read_at' => now()]);
+        if ($updated > 0) {
+            $this->broadcastUnreadCount($user, $audience, $notificationFeed->unreadCount($user, $audience));
+        }
     }
 
     private function broadcastUnreadCount(User $user, string $audience, int $unreadCount): void
