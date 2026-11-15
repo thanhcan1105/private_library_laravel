@@ -23,6 +23,7 @@
 <div class="admin-shell">
     <aside class="admin-sidebar" aria-label="Điều hướng quản trị">
         <a class="admin-sidebar-brand" href="{{ route('admin.dashboard') }}"><img src="{{ asset('images/brand-mark.svg') }}" alt=""><span>Thư viện <strong>riêng</strong><small>QUẢN TRỊ</small></span></a>
+        <button type="button" class="admin-side-link theme-toggle-btn" data-theme-toggle role="switch" aria-label="Chế độ tối" title="Chế độ tối" aria-checked="{{ $appTheme === 'dark' ? 'true' : 'false' }}"><span class="theme-toggle-icon" data-theme-icon aria-hidden="true">{{ $appTheme === 'dark' ? '☀' : '☾' }}</span><span class="theme-toggle-label">Chế độ tối</span><span class="theme-toggle-track" aria-hidden="true"><span class="theme-toggle-thumb"></span></span></button>
         <div class="admin-sidebar-caption">KHÔNG GIAN QUẢN TRỊ</div>
         <a class="admin-side-link @if (request()->routeIs('admin.dashboard')) active @endif" href="{{ route('admin.dashboard') }}"><span aria-hidden="true">◫</span>Tổng quan</a>
         <div class="admin-sidebar-caption admin-sidebar-section">QUẢN LÝ</div>
@@ -45,7 +46,6 @@
             </form>
         </div>
     </aside>
-    <button type="button" class="btn btn-light theme-toggle-btn theme-toggle-icon admin-theme-toggle" data-theme-toggle role="switch" aria-label="Chuyển sang giao diện tối" title="Chuyển sang giao diện tối" aria-checked="{{ $appTheme === 'dark' ? 'true' : 'false' }}"><span data-theme-icon aria-hidden="true">{{ $appTheme === 'dark' ? '☀' : '☾' }}</span></button>
     <main class="app-main admin-main">@yield('content')</main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

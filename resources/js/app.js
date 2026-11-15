@@ -11,8 +11,6 @@ const applyPrivateLibraryTheme = (theme) => {
     themeButtons.forEach((button) => {
         const isDark = nextTheme === 'dark';
         button.setAttribute('aria-checked', String(isDark));
-        button.setAttribute('aria-label', isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối');
-        button.title = isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối';
         const icon = button.querySelector('[data-theme-icon]');
         if (icon) {
             icon.textContent = isDark ? '☀' : '☾';
@@ -74,10 +72,7 @@ document.addEventListener('click', async (event) => {
     } catch {
         applyPrivateLibraryTheme(previousTheme);
         button.title = 'Không lưu được giao diện. Hãy thử lại.';
-        window.setTimeout(() => {
-            const isDark = document.documentElement.dataset.theme === 'dark';
-            button.title = isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối';
-        }, 2200);
+        window.setTimeout(() => { button.title = 'Chế độ tối'; }, 2200);
     } finally {
         themeButtons.forEach((themeButton) => { themeButton.disabled = false; });
     }
