@@ -14,15 +14,8 @@ class AuthorController extends Controller
     public function index(): View
     {
         $authors = DB::table('authors')
-            ->leftJoin('books', 'authors.id', '=', 'books.author_id')
-            ->groupBy('authors.id', 'authors.name', 'authors.bio')
-            ->orderBy('authors.name')
-            ->get([
-                'authors.id',
-                'authors.name',
-                'authors.bio',
-                DB::raw('COUNT(books.id) as book_count'),
-            ]);
+            ->orderBy('name')
+            ->get(['id', 'name', 'bio']);
 
         return view('admin.authors.index', compact('authors'));
     }

@@ -20,10 +20,6 @@
 @forelse ($authors as $author)
     <div class="card border-0 shadow-sm mb-2">
         <div class="card-body">
-            <div class="d-flex justify-content-between mb-2">
-                <strong>{{ $author->name }}</strong>
-                <span class="badge bg-light text-dark border">{{ $author->book_count }} sách</span>
-            </div>
             <form id="author-update-{{ $author->id }}" method="POST" action="{{ route('admin.authors.update', $author->id) }}" class="row g-2">
                 @csrf
                 @method('PUT')
