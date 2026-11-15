@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand-mark.svg') }}">
-    <link href="{{ asset('css/library.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/library.css') }}?v={{ filemtime(public_path('css/library.css')) }}" rel="stylesheet">
     @vite('resources/js/app.js')
     @yield('styles')
 </head>
@@ -48,19 +48,6 @@
     </aside>
     <main class="app-main admin-main">
         <div class="admin-main-content">@yield('content')</div>
-        <footer class="app-footer admin-footer">
-            <div class="app-footer-inner">
-                <a class="app-footer-brand" href="{{ route('admin.dashboard') }}">
-                    <img src="{{ asset('images/brand-mark.svg') }}" alt="" aria-hidden="true">
-                    <span><strong>Thư viện riêng</strong><small>Khu vực quản trị</small></span>
-                </a>
-                <nav class="app-footer-links" aria-label="Liên kết cuối trang">
-                    <a href="{{ route('admin.dashboard') }}">Tổng quan</a>
-                    <a href="{{ route('library') }}">Khu người dùng</a>
-                </nav>
-                <small class="app-footer-copyright">© {{ now()->year }} Thư viện riêng</small>
-            </div>
-        </footer>
     </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
