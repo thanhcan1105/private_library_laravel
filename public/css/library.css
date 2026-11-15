@@ -2280,7 +2280,7 @@ html[data-theme="dark"] body:is(.user-body, .admin-body) :is(.border, .border-to
 html[data-theme="dark"] body:is(.user-body, .admin-body) .app-confirm-modal .modal-content { border-color: #354540; }
 html[data-theme="dark"] body:is(.user-body, .admin-body) .theme-toggle-btn { border-color: #52645b; color: #d8e5de; }
 html[data-theme="dark"] body.user-body .theme-toggle-btn:hover { background: #263d37; color: #fff; }
-.theme-toggle-btn { display: inline-flex; align-items: center; gap: .5rem; white-space: nowrap; }
+.theme-toggle-btn { display: inline-flex; align-items: center; gap: .75rem; white-space: nowrap; }
 .theme-toggle-icon { display: inline-grid; width: 1.1rem; place-items: center; color: #6f7d75; font-size: 1rem; line-height: 1; }
 .theme-toggle-label { font-size: .78rem; font-weight: 600; }
 .theme-toggle-track { position: relative; display: inline-flex; width: 2.15rem; height: 1.2rem; flex: 0 0 auto; align-items: center; padding: .13rem; border: 1px solid #c3cec8; border-radius: 999px; background: #e8eeea; transition: background-color .18s ease, border-color .18s ease; }
