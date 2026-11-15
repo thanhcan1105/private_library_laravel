@@ -1,9 +1,20 @@
 <!DOCTYPE html>
-<html lang="vi">
+@php
+    $appTheme = Auth::check()
+        ? (DB::table('reading_settings')->where('user_id', Auth::id())->value('theme') ?? 'light')
+        : 'light';
+@endphp
+<html lang="vi" data-theme="{{ $appTheme }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @guest
+        <script>try { const savedTheme = localStorage.getItem('private-library-theme'); if (savedTheme === 'light' || savedTheme === 'dark') document.documentElement.dataset.theme = savedTheme; } catch {}</script>
+    @endguest
+    @auth
+        <script>window.privateLibraryThemeConfig = { updateUrl: @json(route('reading-settings.update')) };</script>
+    @endauth
     @auth
         <script>window.privateLibraryNotificationConfig = { userId: @json(Auth::id()), isAdmin: @json(Auth::user()->role === 'admin' || Auth::user()->role === 'manager'), audience: 'user', notificationsUrl: @json(route('notifications.index')), pollUrl: @json(route('notifications.poll')), readUrlTemplate: @json(route('notifications.read', '__notification_id__')), deleteUrlTemplate: @json(route('notifications.destroy', '__notification_id__')), readAllUrl: @json(route('notifications.read-all')) };</script>
     @endauth
@@ -68,6 +79,7 @@
                 </div>
             </div>
         @endauth
+        <button type="button" class="btn btn-sm btn-outline-secondary theme-toggle-btn" data-theme-toggle role="switch" aria-label="Chế độ tối" aria-checked="{{ $appTheme === 'dark' ? 'true' : 'false' }}"><span class="theme-toggle-track" aria-hidden="true"><span class="theme-toggle-thumb"></span></span><span class="theme-toggle-label">Chế độ tối</span></button>
     </div>
 </nav>
 <main class="container-xl app-main @if (request()->routeIs('books.show')) app-main-reader @endif">

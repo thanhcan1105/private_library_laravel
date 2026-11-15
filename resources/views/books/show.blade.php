@@ -1044,8 +1044,20 @@
         themeRadios.forEach(function (radio) {
             radio.addEventListener("change", function (e) {
                 currentTheme = e.target.value;
-                applyAppearance(+fontSizeInput.value, currentFontFamily, currentTheme);
+                if (window.applyPrivateLibraryTheme) {
+                    window.applyPrivateLibraryTheme(currentTheme);
+                } else {
+                    applyAppearance(+fontSizeInput.value, currentFontFamily, currentTheme);
+                }
             });
+        });
+
+        document.addEventListener("private-library-theme-changed", function (event) {
+            currentTheme = event.detail.theme;
+            themeRadios.forEach(function (radio) {
+                radio.checked = radio.value === currentTheme;
+            });
+            applyAppearance(+fontSizeInput.value, currentFontFamily, currentTheme);
         });
 
         function saveSettingsToBackend() {

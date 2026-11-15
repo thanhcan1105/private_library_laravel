@@ -11,8 +11,8 @@ class ReadingSettingsController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'font_size'   => ['required', 'integer', 'between:8,48'],
-            'font_family' => ['required', 'string', 'max:50'],
+            'font_size'   => ['sometimes', 'required', 'integer', 'between:8,48'],
+            'font_family' => ['sometimes', 'required', 'string', 'max:50'],
             'theme'       => ['required', 'string', 'in:light,dark'],
         ], [
             'required'          => 'Vui lòng cung cấp :attribute.',
@@ -25,11 +25,13 @@ class ReadingSettingsController extends Controller
             'theme'       => 'giao diện',
         ]);
 
+        $currentSettings = DB::table('reading_settings')->where('user_id', Auth::id())->first();
+
         DB::table('reading_settings')->updateOrInsert(
             ['user_id' => Auth::id()],
             [
-                'font_size'   => (int) $validated['font_size'],
-                'font_family' => $validated['font_family'],
+                'font_size'   => (int) ($validated['font_size'] ?? $currentSettings?->font_size ?? 16),
+                'font_family' => $validated['font_family'] ?? $currentSettings?->font_family ?? 'Serif',
                 'theme'       => $validated['theme'],
             ]
         );

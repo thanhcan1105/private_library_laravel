@@ -1,5 +1,79 @@
 import './echo';
 
+const themeConfig = window.privateLibraryThemeConfig;
+const themeButtons = [...document.querySelectorAll('[data-theme-toggle]')];
+
+const applyPrivateLibraryTheme = (theme) => {
+    const nextTheme = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = nextTheme;
+    document.body?.setAttribute('data-theme', nextTheme);
+
+    themeButtons.forEach((button) => {
+        const isDark = nextTheme === 'dark';
+        button.setAttribute('aria-checked', String(isDark));
+    });
+
+    document.dispatchEvent(new CustomEvent('private-library-theme-changed', {
+        detail: { theme: nextTheme },
+    }));
+};
+
+window.applyPrivateLibraryTheme = applyPrivateLibraryTheme;
+
+let storedTheme = document.documentElement.dataset.theme || 'light';
+if (!themeConfig) {
+    try {
+        storedTheme = localStorage.getItem('private-library-theme') || storedTheme;
+    } catch {
+        // Continue with the server-provided theme when browser storage is unavailable.
+    }
+}
+applyPrivateLibraryTheme(storedTheme);
+
+document.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-theme-toggle]');
+    if (!button || button.disabled) {
+        return;
+    }
+
+    event.preventDefault();
+    const previousTheme = document.documentElement.dataset.theme || 'light';
+    const nextTheme = previousTheme === 'dark' ? 'light' : 'dark';
+    applyPrivateLibraryTheme(nextTheme);
+
+    if (!themeConfig) {
+        try {
+            localStorage.setItem('private-library-theme', nextTheme);
+        } catch {
+            // The current page still keeps the selected theme for this visit.
+        }
+        return;
+    }
+
+    themeButtons.forEach((themeButton) => { themeButton.disabled = true; });
+    try {
+        const response = await fetch(themeConfig.updateUrl, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            },
+            body: JSON.stringify({ theme: nextTheme }),
+        });
+        if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+            throw new Error('Không lưu được giao diện.');
+        }
+    } catch {
+        applyPrivateLibraryTheme(previousTheme);
+        button.title = 'Không lưu được giao diện. Hãy thử lại.';
+        window.setTimeout(() => { button.title = ''; }, 2200);
+    } finally {
+        themeButtons.forEach((themeButton) => { themeButton.disabled = false; });
+    }
+});
+
 const confirmModalElement = document.getElementById('appConfirmModal');
 const confirmModal = confirmModalElement && window.bootstrap?.Modal
     ? window.bootstrap.Modal.getOrCreateInstance(confirmModalElement)

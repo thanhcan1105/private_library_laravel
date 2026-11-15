@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="vi">
+@php
+    $appTheme = DB::table('reading_settings')->where('user_id', Auth::id())->value('theme') ?? 'light';
+@endphp
+<html lang="vi" data-theme="{{ $appTheme }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>window.privateLibraryThemeConfig = { updateUrl: @json(route('reading-settings.update')) };</script>
     <script>window.privateLibraryNotificationConfig = { userId: @json(Auth::id()), isAdmin: true, audience: 'admin', notificationsUrl: @json(route('admin.notifications.index')), pollUrl: @json(route('admin.notifications.poll')), readUrlTemplate: @json(route('admin.notifications.read', '__notification_id__')), deleteUrlTemplate: @json(route('admin.notifications.destroy', '__notification_id__')), readAllUrl: @json(route('admin.notifications.read-all')), reviewPollUrl: @json(route('admin.public-submissions.poll')), reviewCardUrlTemplate: @json(route('admin.public-submissions.card', '__book_id__')) };</script>
     <title>@yield('title', 'Quản trị — Thư viện riêng')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,6 +23,7 @@
 <div class="admin-shell">
     <aside class="admin-sidebar" aria-label="Điều hướng quản trị">
         <a class="admin-sidebar-brand" href="{{ route('admin.dashboard') }}"><img src="{{ asset('images/brand-mark.svg') }}" alt=""><span>Thư viện <strong>riêng</strong><small>QUẢN TRỊ</small></span></a>
+        <button type="button" class="admin-side-link theme-toggle-btn" data-theme-toggle role="switch" aria-label="Chế độ tối" aria-checked="{{ $appTheme === 'dark' ? 'true' : 'false' }}"><span class="theme-toggle-track" aria-hidden="true"><span class="theme-toggle-thumb"></span></span><span class="theme-toggle-label">Chế độ tối</span></button>
         <div class="admin-sidebar-caption">KHÔNG GIAN QUẢN TRỊ</div>
         <a class="admin-side-link @if (request()->routeIs('admin.dashboard')) active @endif" href="{{ route('admin.dashboard') }}"><span aria-hidden="true">◫</span>Tổng quan</a>
         <div class="admin-sidebar-caption admin-sidebar-section">QUẢN LÝ</div>
