@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 use Throwable;
@@ -11,23 +10,18 @@ use ZipArchive;
 
 class MobiConversionService
 {
-    public function convert(string $sourcePath): ?string
+    public function convert(string $sourcePath, int $uploadId): ?string
     {
-        $temporaryBase = tempnam(sys_get_temp_dir(), 'private_library_mobi_');
-        if ($temporaryBase === false) {
-            return null;
-        }
-
-        @unlink($temporaryBase);
-        $inputPath = $temporaryBase.'.mobi';
-        $outputPath = $temporaryBase.'.epub';
-        $keepOutput = false;
         $disk = Storage::disk('local');
-        $conversionDirectory = 'tmp/conversions/'.Str::uuid();
+        $conversionDirectory = 'tmp/conversions/'.$uploadId;
+        $workingDirectory = $disk->path($conversionDirectory.'/calibre');
+        $inputPath = $disk->path($conversionDirectory.'/source.mobi');
+        $outputPath = $disk->path($conversionDirectory.'/converted.epub');
+        $keepOutput = false;
 
         try {
-            $disk->makeDirectory($conversionDirectory);
-            $workingDirectory = $disk->path($conversionDirectory);
+            $disk->deleteDirectory($conversionDirectory);
+            $disk->makeDirectory($conversionDirectory.'/calibre');
 
             if (! copy($sourcePath, $inputPath)) {
                 return null;
@@ -93,7 +87,9 @@ class MobiConversionService
                 @unlink($outputPath);
             }
 
-            $disk->deleteDirectory($conversionDirectory);
+            if (! $keepOutput) {
+                $disk->deleteDirectory($conversionDirectory);
+            }
         }
     }
 
@@ -101,13 +97,78 @@ class MobiConversionService
     {
         $zip = new ZipArchive;
 
-        if ($zip->open($path) !== true) {
+        if ($zip->open($path, ZipArchive::CHECKCONS) !== true) {
             return false;
         }
 
-        $mime = $zip->getFromName('mimetype');
-        $zip->close();
+        try {
+            if ($zip->numFiles < 3 || $zip->numFiles > 10000) {
+                return false;
+            }
 
-        return $mime !== false && trim($mime) === 'application/epub+zip';
+            $firstEntry = $zip->statIndex(0);
+            if (($firstEntry['name'] ?? null) !== 'mimetype'
+                || ($firstEntry['comp_method'] ?? null) !== ZipArchive::CM_STORE
+                || $zip->getFromIndex(0) !== 'application/epub+zip') {
+                return false;
+            }
+
+            $expandedSize = 0;
+            for ($index = 0; $index < $zip->numFiles; $index++) {
+                $entry = $zip->statIndex($index);
+                if ($entry === false || ! isset($entry['size']) || ! is_int($entry['size'])) {
+                    return false;
+                }
+
+                $expandedSize += $entry['size'];
+                if ($expandedSize > 250 * 1024 * 1024) {
+                    return false;
+                }
+            }
+
+            $containerXml = $zip->getFromName('META-INF/container.xml');
+            if (! is_string($containerXml) || strlen($containerXml) > 1024 * 1024) {
+                return false;
+            }
+
+            $container = $this->loadSafeXml($containerXml);
+            if (! $container) {
+                return false;
+            }
+
+            $rootfile = $container->getElementsByTagNameNS('*', 'rootfile')->item(0);
+            $packagePath = $rootfile instanceof \DOMElement
+                ? str_replace('\\', '/', trim($rootfile->getAttribute('full-path')))
+                : '';
+            if ($packagePath === '' || str_starts_with($packagePath, '/') || preg_match('~(^|/)\.\.?(/|$)~', $packagePath)) {
+                return false;
+            }
+
+            $packageXml = $zip->getFromName($packagePath);
+            if (! is_string($packageXml) || strlen($packageXml) > 5 * 1024 * 1024) {
+                return false;
+            }
+
+            $package = $this->loadSafeXml($packageXml);
+
+            return $package?->documentElement?->localName === 'package';
+        } catch (Throwable) {
+            return false;
+        } finally {
+            $zip->close();
+        }
+    }
+
+    private function loadSafeXml(string $xml): ?\DOMDocument
+    {
+        $previousErrorMode = libxml_use_internal_errors(true);
+        $document = new \DOMDocument;
+        $document->resolveExternals = false;
+        $document->substituteEntities = false;
+        $isValid = $document->loadXML($xml, LIBXML_NONET | LIBXML_NOBLANKS);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previousErrorMode);
+
+        return $isValid ? $document : null;
     }
 }

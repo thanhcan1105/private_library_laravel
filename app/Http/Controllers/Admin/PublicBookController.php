@@ -7,6 +7,7 @@ use App\Events\PublicBookSubmissionChanged;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\PublicBookSubmissionNotification;
+use App\Services\BookUploadRecoveryService;
 use App\Services\NotificationFeedService;
 use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Contracts\View\View;
@@ -20,9 +21,13 @@ use Illuminate\Support\Facades\Log;
 
 class PublicBookController extends Controller
 {
-    public function index(): View
+    public function index(Request $request, BookUploadRecoveryService $uploadRecovery): View
     {
-        $books = DB::table('books')
+        $uploadRecovery->failStaleUploadsFor((int) Auth::id());
+        $searchInput = $request->query('search');
+        $search = is_string($searchInput) ? mb_substr(trim($searchInput), 0, 100) : '';
+
+        $query = DB::table('books')
             ->leftJoin('authors', 'books.author_id', '=', 'authors.id')
             ->join('users as uploaders', 'books.user_id', '=', 'uploaders.id')
             ->where('books.is_public', true)
@@ -32,8 +37,17 @@ class PublicBookController extends Controller
                 'authors.name as author_name',
                 'uploaders.username as uploader_name',
             )
-            ->selectRaw("(SELECT GROUP_CONCAT(g.name ORDER BY g.name SEPARATOR ', ') FROM book_genre bg JOIN genres g ON g.id = bg.genre_id WHERE bg.book_id = books.id) as genre_names")
-            ->paginate(20);
+            ->selectRaw("(SELECT GROUP_CONCAT(g.name ORDER BY g.name SEPARATOR ', ') FROM book_genre bg JOIN genres g ON g.id = bg.genre_id WHERE bg.book_id = books.id) as genre_names");
+
+        if ($search !== '') {
+            $searchPrefix = addcslashes($search, '\\%_').'%';
+            $query->where(function ($builder) use ($searchPrefix): void {
+                $builder->where('books.title', 'like', $searchPrefix)
+                    ->orWhere('authors.name', 'like', $searchPrefix);
+            });
+        }
+
+        $books = $query->orderByDesc('books.id')->cursorPaginate(20)->withQueryString();
 
         $bookUploads = DB::table('book_uploads')
             ->where('user_id', Auth::id())
@@ -42,7 +56,7 @@ class PublicBookController extends Controller
             ->limit(5)
             ->get(['id', 'title', 'status', 'progress_percent', 'progress_message', 'error_message', 'created_at', 'is_public', 'source_format']);
 
-        return view('admin.public-books.index', compact('books', 'bookUploads'));
+        return view('admin.public-books.index', compact('books', 'bookUploads', 'search'));
     }
 
     public function unpublish(int $id): RedirectResponse

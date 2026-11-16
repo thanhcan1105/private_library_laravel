@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\MobiConversionService;
+use DomainException;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -12,7 +13,6 @@ use Illuminate\Http\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
 
@@ -56,7 +56,7 @@ class ProcessBookUploadCommand extends Command
             $sourcePath = $disk->path($upload->source_path);
             if ($upload->source_format === 'mobi') {
                 $this->updateProgress($uploadId, 20, 'Đang chuyển MOBI sang EPUB…');
-                $epubPath = $mobiConversionService->convert($sourcePath);
+                $epubPath = $mobiConversionService->convert($sourcePath, $uploadId);
                 if ($epubPath === null) {
                     throw new RuntimeException('MOBI conversion failed.');
                 }
@@ -82,7 +82,7 @@ class ProcessBookUploadCommand extends Command
                 throw new RuntimeException('Processed EPUB size is invalid.');
             }
 
-            $bookFileName = Str::uuid().'.epub';
+            $bookFileName = 'upload-'.$uploadId.'.epub';
             if ($upload->source_format === 'epub') {
                 $bookPath = 'books/'.$upload->user_id.'/'.$bookFileName;
                 $disk->makeDirectory('books/'.$upload->user_id);
@@ -101,6 +101,19 @@ class ProcessBookUploadCommand extends Command
                 $currentUpload = DB::table('book_uploads')->where('id', $uploadId)->lockForUpdate()->first(['status']);
                 if (! $currentUpload || $currentUpload->status !== 'processing') {
                     return null;
+                }
+
+                $owner = DB::table('users')
+                    ->where('id', $upload->user_id)
+                    ->lockForUpdate()
+                    ->first(['storage_limit']);
+                if (! $owner) {
+                    throw new RuntimeException('The book owner no longer exists.');
+                }
+
+                $usedStorage = (int) DB::table('books')->where('user_id', $upload->user_id)->sum('file_size');
+                if ($usedStorage + $fileSize > (int) $owner->storage_limit) {
+                    throw new DomainException('Storage limit exceeded.');
                 }
 
                 $authorId = null;
@@ -146,6 +159,12 @@ class ProcessBookUploadCommand extends Command
             });
 
             if ($bookId === null) {
+                if ($upload->source_path) {
+                    $disk->delete($upload->source_path);
+                }
+                if ($bookPath !== null) {
+                    $disk->delete($bookPath);
+                }
                 $this->finishCancelledUpload($uploadId, $upload->source_path, $bookPath, $disk);
 
                 return self::SUCCESS;
@@ -165,7 +184,9 @@ class ProcessBookUploadCommand extends Command
                 $disk->delete($bookPath);
             }
 
-            $errorMessage = $exception instanceof QueryException && (int) ($exception->errorInfo[1] ?? 0) === 1644
+            $quotaExceeded = $exception instanceof DomainException
+                || ($exception instanceof QueryException && (int) ($exception->errorInfo[1] ?? 0) === 1644);
+            $errorMessage = $quotaExceeded
                 ? 'Dung lượng lưu trữ của tài khoản không đủ cho sách này.'
                 : ($upload->source_format === 'epub'
                     ? 'Tệp EPUB không hợp lệ hoặc không thể hoàn tất xử lý.'
@@ -192,8 +213,11 @@ class ProcessBookUploadCommand extends Command
             ]);
             $this->error($errorMessage);
         } finally {
-            if ($upload->source_format === 'mobi' && $epubPath !== null && is_file($epubPath)) {
-                @unlink($epubPath);
+            if ($upload->source_format === 'mobi') {
+                if ($epubPath !== null && is_file($epubPath)) {
+                    @unlink($epubPath);
+                }
+                $disk->deleteDirectory('tmp/conversions/'.$uploadId);
             }
         }
 

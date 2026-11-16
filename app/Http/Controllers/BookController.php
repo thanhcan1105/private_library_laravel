@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\PublicBookSubmissionChanged;
 use App\Models\User;
 use App\Notifications\PublicBookSubmissionNotification;
+use App\Services\BookUploadRecoveryService;
 use DOMDocument;
 use DOMXPath;
 use Illuminate\Broadcasting\BroadcastException;
@@ -27,8 +28,10 @@ use ZipArchive;
 
 class BookController extends Controller
 {
-    public function index()
+    public function index(BookUploadRecoveryService $uploadRecovery)
     {
+        $uploadRecovery->failStaleUploadsFor((int) Auth::id());
+
         $query = DB::table('books')
             ->leftJoin('authors', 'books.author_id', '=', 'authors.id')
             ->leftJoin('public_book_submissions as submissions', 'books.id', '=', 'submissions.book_id')
@@ -111,8 +114,10 @@ class BookController extends Controller
         return view('books.index', compact('books', 'genres', 'search', 'recentBook', 'libraryCount', 'bookUploads'));
     }
 
-    public function bookUploadStatuses(): JsonResponse
+    public function bookUploadStatuses(BookUploadRecoveryService $uploadRecovery): JsonResponse
     {
+        $uploadRecovery->failStaleUploadsFor((int) Auth::id());
+
         $uploads = DB::table('book_uploads')
             ->where('user_id', Auth::id())
             ->where('created_at', '>=', now()->subDay())

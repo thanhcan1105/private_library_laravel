@@ -185,7 +185,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title h6 mb-0" id="settingsModalLabel">Cài đặt giao diện đọc</h5>
+                        <h5 class="modal-title h6 mb-0" id="settingsModalLabel">Cài đặt đọc sách</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                     </div>
                     <div class="modal-body">
@@ -222,25 +222,6 @@
                                     </option>
                                 @endforeach
                             </select>
-                        </div>
-
-                        <!-- Theme -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Giao diện màu</label>
-                            <div class="d-flex gap-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="setting-theme" id="theme-light" value="light" {{ $settings->theme === 'light' ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="theme-light">
-                                        ☀️ Sáng
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="setting-theme" id="theme-dark" value="dark" {{ $settings->theme === 'dark' ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="theme-dark">
-                                        🌙 Tối
-                                    </label>
-                                </div>
-                            </div>
                         </div>
 
                         <div id="settings-save-alert" class="alert alert-success py-2 px-3 small d-none mb-0">
@@ -307,7 +288,7 @@
             rendition.themes.font(fontFamily);
 
             rendition.getContents().forEach(function (contents) {
-                applyThemeToContents(contents, theme);
+                applyThemeToContents(contents, theme, fontFamily);
             });
 
             const wrapper = document.getElementById("reader-wrapper");
@@ -321,7 +302,7 @@
             }
         }
 
-        function applyThemeToContents(contents, theme) {
+        function applyThemeToContents(contents, theme, fontFamily = currentFontFamily) {
             const contentDocument = contents.document;
             let themeStyle = contentDocument.getElementById("private-library-reader-theme");
 
@@ -331,10 +312,14 @@
                 (contentDocument.head || contentDocument.documentElement).appendChild(themeStyle);
             }
 
+            const allowedFonts = ["Serif", "Sans-serif", "Georgia", "Times New Roman", "Arial"];
+            const safeFontFamily = allowedFonts.includes(fontFamily) ? fontFamily : "Serif";
+            const fontRule = "html, body, body * { font-family: '" + safeFontFamily + "' !important; } ";
+
             if (theme === "dark") {
-                themeStyle.textContent = "html, body { background-color: #1a1a1a !important; color: #e0e0e0 !important; cursor: default !important; caret-color: transparent !important; } body, body * { color: #e0e0e0 !important; cursor: default !important; caret-color: transparent !important; } a, a *, button, [role='button'] { color: #8ab4f8 !important; cursor: pointer !important; } input:not([type='checkbox']):not([type='radio']):not([type='file']), textarea, [contenteditable='true'] { cursor: text !important; caret-color: auto !important; }";
+                themeStyle.textContent = fontRule + "html, body { background-color: #1a1a1a !important; color: #e0e0e0 !important; cursor: default !important; caret-color: transparent !important; } body, body * { color: #e0e0e0 !important; cursor: default !important; caret-color: transparent !important; } a, a *, button, [role='button'] { color: #8ab4f8 !important; cursor: pointer !important; } input:not([type='checkbox']):not([type='radio']):not([type='file']), textarea, [contenteditable='true'] { cursor: text !important; caret-color: auto !important; }";
             } else {
-                themeStyle.textContent = "html, body { background-color: #ffffff !important; color: #212529 !important; cursor: default !important; caret-color: transparent !important; } body, body * { color: #212529 !important; cursor: default !important; caret-color: transparent !important; } a, a *, button, [role='button'] { color: #0d6efd !important; cursor: pointer !important; } input:not([type='checkbox']):not([type='radio']):not([type='file']), textarea, [contenteditable='true'] { cursor: text !important; caret-color: auto !important; }";
+                themeStyle.textContent = fontRule + "html, body { background-color: #ffffff !important; color: #212529 !important; cursor: default !important; caret-color: transparent !important; } body, body * { color: #212529 !important; cursor: default !important; caret-color: transparent !important; } a, a *, button, [role='button'] { color: #0d6efd !important; cursor: pointer !important; } input:not([type='checkbox']):not([type='radio']):not([type='file']), textarea, [contenteditable='true'] { cursor: text !important; caret-color: auto !important; }";
             }
         }
 
@@ -583,7 +568,7 @@
         }
 
         rendition.hooks.content.register(function (contents) {
-            applyThemeToContents(contents, currentTheme);
+            applyThemeToContents(contents, currentTheme, currentFontFamily);
 
             contents.document.addEventListener("wheel", function (event) {
                 if (event.ctrlKey || Math.abs(event.deltaY) < 1) return;
@@ -1040,35 +1025,17 @@
             applyAppearance(+fontSizeInput.value, currentFontFamily, currentTheme);
         });
 
-        const themeRadios = document.querySelectorAll('input[name="setting-theme"]');
-        themeRadios.forEach(function (radio) {
-            radio.addEventListener("change", function (e) {
-                currentTheme = e.target.value;
-                if (window.applyPrivateLibraryTheme) {
-                    window.applyPrivateLibraryTheme(currentTheme);
-                } else {
-                    applyAppearance(+fontSizeInput.value, currentFontFamily, currentTheme);
-                }
-            });
-        });
-
         document.addEventListener("private-library-theme-changed", function (event) {
             currentTheme = event.detail.theme;
-            themeRadios.forEach(function (radio) {
-                radio.checked = radio.value === currentTheme;
-            });
             applyAppearance(+fontSizeInput.value, currentFontFamily, currentTheme);
         });
 
         function saveSettingsToBackend() {
             const newSize = +fontSizeInput.value;
             const newFamily = fontFamilySelect.value;
-            const checkedThemeRadio = document.querySelector('input[name="setting-theme"]:checked');
-            const newTheme = checkedThemeRadio ? checkedThemeRadio.value : "light";
 
             currentFontSize = newSize;
             currentFontFamily = newFamily;
-            currentTheme = newTheme;
 
             fetch("{{ route('reading-settings.update') }}", {
                 method: "POST",
@@ -1079,8 +1046,7 @@
                 },
                 body: JSON.stringify({
                     font_size: newSize,
-                    font_family: newFamily,
-                    theme: newTheme
+                    font_family: newFamily
                 })
             })
             .then(function (res) { return res.json(); })

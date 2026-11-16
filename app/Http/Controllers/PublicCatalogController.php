@@ -4,14 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PublicCatalogController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $search = trim((string) request('search', ''));
+        $searchInput = $request->query('search');
+        $search = is_string($searchInput) ? mb_substr(trim($searchInput), 0, 100) : '';
+        $genreIdInput = $request->query('genre_id');
+        $genreId = filter_var($genreIdInput, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) ?: null;
         $query = DB::table('books')
             ->leftJoin('authors', 'books.author_id', '=', 'authors.id')
             ->leftJoin('saved_books', function ($join) {
@@ -33,20 +37,21 @@ class PublicCatalogController extends Controller
 
         if ($search !== '') {
             $query->where(function ($builder) use ($search) {
-                $builder->where('books.title', 'like', '%'.$search.'%')
-                    ->orWhere('authors.name', 'like', '%'.$search.'%');
+                $searchPrefix = addcslashes($search, '\\%_').'%';
+                $builder->where('books.title', 'like', $searchPrefix)
+                    ->orWhere('authors.name', 'like', $searchPrefix);
             });
         }
 
-        if (request()->filled('genre_id')) {
-            $query->whereExists(function ($genre) {
+        if ($genreId !== null) {
+            $query->whereExists(function ($genre) use ($genreId) {
                 $genre->selectRaw('1')->from('book_genre')
                     ->whereColumn('book_genre.book_id', 'books.id')
-                    ->where('book_genre.genre_id', request('genre_id'));
+                    ->where('book_genre.genre_id', $genreId);
             });
         }
 
-        $books = $query->orderByDesc('books.created_at')->paginate(12)->withQueryString()->through(function ($book) {
+        $books = $query->orderByDesc('books.created_at')->orderByDesc('books.id')->cursorPaginate(12)->withQueryString()->through(function ($book) {
             $book->is_saved = $book->saved_at !== null || (int) $book->user_id === (int) Auth::id();
             $book->is_owned = (int) $book->user_id === (int) Auth::id();
 

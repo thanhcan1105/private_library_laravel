@@ -2,14 +2,14 @@
 @section('title', 'Kho sách công khai')
 @section('content')
 <header class="user-subpage-heading">
-    <div><span class="eyebrow">KHÁM PHÁ VÀ ĐỌC</span><h1>Kho sách công khai</h1><p>Sách do quản trị viên và quản lý tuyển chọn. Lưu sách để đưa vào thư viện riêng của bạn.</p></div>
+        <div><span class="eyebrow">KHÁM PHÁ VÀ ĐỌC</span><h1>Kho sách công khai</h1><p>Sách do quản trị viên và quản lý tuyển chọn. Lưu sách để đưa vào thư viện riêng của bạn.</p></div>
 </header>
 
 @if (session('status'))<div class="alert alert-success" role="status">{{ session('status') }}</div>@endif
 
 <section class="library-filter-panel" aria-label="Tìm sách công khai">
     <form method="GET" action="{{ route('catalog.index') }}" class="library-filter">
-        <div class="library-search"><span class="library-search-icon" aria-hidden="true">⌕</span><label class="visually-hidden" for="catalog-search">Tìm tiêu đề hoặc tác giả</label><input id="catalog-search" name="search" value="{{ $search }}" class="form-control" placeholder="Tìm theo tiêu đề hoặc tác giả"></div>
+        <div class="library-search"><span class="library-search-icon" aria-hidden="true">⌕</span><label class="visually-hidden" for="catalog-search">Tìm tiêu đề hoặc tác giả</label><input id="catalog-search" name="search" value="{{ $search }}" class="form-control" placeholder="Tìm từ đầu tiêu đề hoặc tên tác giả"></div>
         <select name="genre_id" class="form-select" aria-label="Lọc theo thể loại"><option value="">Tất cả thể loại</option>@foreach ($genres as $genre)<option value="{{ $genre->id }}" @selected((string) request('genre_id') === (string) $genre->id)>{{ $genre->name }}</option>@endforeach</select>
         <button class="btn btn-primary">Tìm sách</button>
         @if ($search !== '' || request()->filled('genre_id'))<a href="{{ route('catalog.index') }}" class="btn btn-outline-secondary">Xóa lọc</a>@endif
@@ -43,7 +43,7 @@
             </article>
         @endforeach
     </section>
-    <div class="library-pagination-label">Đang xem {{ $books->firstItem() }}–{{ $books->lastItem() }} trong {{ $books->total() }} cuốn</div>
-    <div class="mt-2">{{ $books->links('pagination::bootstrap-5') }}</div>
+    <div class="library-pagination-label">Đang hiển thị {{ $books->count() }} cuốn trên trang này</div>
+    <div class="mt-2">{{ $books->links('pagination.cursor-bootstrap') }}</div>
 @endif
 @endsection
